@@ -16,39 +16,34 @@ from Bio import SeqIO
 
 parser = argparse.ArgumentParser(description="Split fasta file into subtype fastas based on metadata table")
 parser.add_argument('--metadata', help="metadata, required", required=True)
-parser.add_argument('--fasta', required=True,
-                    help='The fasta file to split')
-#parser.add_argument('--filter', help="to omit writting some sequences, True or False", default=False)
 args = parser.parse_args()
 
-fastaName = args.fasta
 metaFile = args.metadata
 metaPrefix = metaFile.split(".")[0]
 #load genome dataframe and generate genomeID-to-segment lookup dictionary
 metaDF = pd.read_csv(metaFile, sep="\t")
 metaDict = metaDF.set_index('accession')['subtypeFolder'].to_dict()
-folderIDs = metaDF['subtypeFolder'].unique()
-
-fastaDicts = {}
-for id in folderIDs:
-    fastaDicts[id] = ""
+subtypeFullIDs = metaDF['subtypeFolder'].unique()
 
 accessionList = []
-fasta = open(fastaName, 'r')
-for seq_record in SeqIO.parse(fasta, "fasta"):
-    seqID = seq_record.id
-    if seqID in metaDict:
-        seqFolder = metaDict[seqID]
-        fastaDicts[seqFolder] = fastaDicts[seqFolder] + ">" + seqID + "\n" + seq_record.seq + "\n"
+for subtypeID in subtypeFullIDs:
+    subFasta = subtypeID + ".fasta"
+    print(subtypeID)
+    for seq_record in SeqIO.parse(subFasta, "fasta"):
+        seqID = seq_record.id
         accessionList.append(seqID)
-
-fasta.close() 
+    print(len(accessionList))
 
 filterMeta = metaDF[metaDF['accession'].isin(accessionList)]
 filterMeta.to_csv(metaPrefix + "_inFasta.tsv", sep="\t", index=False)
 
-for id in folderIDs:
-    fastaOut = open(id+".fasta", 'w')
-    fastaOut.write(str(fastaDicts[id]))
-    fastaOut.close()
+strainCount = len(set(filterMeta['strain']))
+subtypeCountDict = {}
+for subtypeID in subtypeFullIDs:
+    subtypeCountDict[subtypeID] = {}
+    count = len(set(filterMeta[filterMeta['subtypeFolder']==subtypeID]['strain']))
+    subtypeCountDict[subtypeID]['count'] = count
+    subtypeCountDict[subtypeID]['prop'] = count/strainCount
 
+subtypeCountDF = pd.DataFrame(data=subtypeCountDict).T
+subtypeCountDF.to_csv(metaPrefix + "_inFasta_counts.tsv", sep="\t")
