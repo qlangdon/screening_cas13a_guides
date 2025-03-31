@@ -32,6 +32,9 @@ if ("prop_subtypes_hit" %in% colnames(guidesFiltered)) {
 if ("refStart" %in% colnames(guidesFiltered)) {
   guidesFiltered <- guidesFiltered |> rename(start = refStart)
 }
+if ("prop_unknown" %in% colnames(guidesFiltered)) {
+  guidesFiltered <- guidesFiltered |> rename(p_unknown = prop_unknown )
+}
 
 guidesKeep <- guidesFiltered |>
   filter(if_any(starts_with("prop"),  ~ .x > cutoff))

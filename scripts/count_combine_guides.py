@@ -3,6 +3,7 @@ __author__ = 'Quinn'
 import os
 import argparse
 import pandas as pd
+from pathlib import Path
 
 ################################################################
 # This script goes through tiled 20bp widows for all strains of a species to make a dataframe with counts of that 
@@ -21,12 +22,13 @@ parser.add_argument('--pathPrefix', required=True,
 args = parser.parse_args()
 
 folderPathPrefix=args.pathPrefix
-#folderPathPrefix='tiled_genomes/Cas13a_RSV-B_chunk_'
-#metaDF = pd.read_csv('RSV-B_strains_metadata.txt', sep="\t")
+#folderPathPrefix='tiled_genomes/tiled_subtype_'
+metaDF = pd.read_csv(args.metadata, sep="\t")
 
 #load genome dataframe and generate genomeID-to-segment lookup dictionary
 metaDF = pd.read_csv(args.metadata, sep="\t")
-metaDict = metaDF.set_index('accession').T.to_dict('list')
+#metaDict = metaDF.set_index('accession').T.to_dict('list')
+metaDict = metaDF.set_index('accession').T.to_dict()
 topClades = list(set(metaDF[metaDF['topSubtype']]['subtype']))
 topCladesDict = {}
 for clade in topClades:
@@ -62,16 +64,6 @@ def getChunkDict(folderBase):
     for pathStep in pathList:
         curAcc = pathStep
         curMeta = metaDict[curAcc]
-        curLen = curMeta[0]
-        curGB = curMeta[1]
-        curSpp = curMeta[2]
-        curSeg = curMeta[3]
-        curClade = curMeta[4]
-        curStrain = curMeta[5]
-        curCountry = curMeta[6]
-        curHost = curMeta[7]
-        curDate = curMeta[8]
-        curTop = curMeta[9]
         windowsPath =  os.path.join(folderBase, pathStep, "windows.txt")
         windowsFile = open(windowsPath, 'r')
         windowLines = windowsFile.readlines()[1:]
@@ -93,18 +85,12 @@ def getChunkDict(folderBase):
                 guideCountDict[winTarget]['GC'].append(winGC)
                 guideCountDict[winTarget]['A'].append(winA)
                 guideCountDict[winTarget]['accM'].append(curAcc)
-                guideCountDict[winTarget]['length'].append(curLen)
-                guideCountDict[winTarget]['gb'].append(curGB)
-                guideCountDict[winTarget]['spp'].append(curSpp)
-                guideCountDict[winTarget]['seg'].append(curSeg)
-                guideCountDict[winTarget]['clade'].append(curClade)
-                guideCountDict[winTarget]['strain'].append(curStrain)
-                guideCountDict[winTarget]['country'].append(curCountry)
-                guideCountDict[winTarget]['host'].append(curHost)
-                guideCountDict[winTarget]['date'].append(curDate)
-                guideCountDict[winTarget]['topSub'].append(curTop)
+                for metaKey in curMeta.keys():
+                    guideCountDict[winTarget][metaKey].append(curMeta[metaKey])
             else:
-                winDict = {'accW':[winAcc], 'start':[winStart], 'target':[winTarget], 'spacer':[winSpacer], 'strand':[winStrand], 'GC':[winGC], 'A':[winA], 'accM':[curAcc], 'length':[curLen], 'gb':[curGB], 'spp':[curSpp], 'seg':[curSeg], 'clade':[curClade], 'strain':[curStrain], 'country':[curCountry], 'host':[curHost], 'date':[curDate], 'topSub':[curTop]}
+                winDict = {'accW':[winAcc], 'start':[winStart], 'target':[winTarget], 'spacer':[winSpacer], 'strand':[winStrand], 'GC':[winGC], 'A':[winA], 'accM':[curAcc]}
+                for metaKey in curMeta.keys():
+                    winDict[metaKey] = [curMeta[metaKey]]
                 guideCountDict[winTarget] = winDict
         windowsFile.close()
     return guideCountDict
@@ -140,7 +126,7 @@ def sumCountDict(guideCountDict, accList):
         guideChunkSumDict['GC_content'].append(targetDict['GC'][firstIndex])
         guideChunkSumDict['total_hit'].append(len(set(targetDict['accM'])))
         guideChunkSumDict['strains_hit'].append(len(set(targetDict['strain'])))
-        guideChunkSumDict['subtypes_hit'].append(len(set(targetDict['clade'])))
+        guideChunkSumDict['subtypes_hit'].append(len(set(targetDict['subtype'])))
         #winTopCladesDict = {}
         for clade in topCladesDictSorted.keys():
             cladeCount = len(strainsCladesDict[clade] & set(targetDict['strain']))
@@ -189,6 +175,7 @@ guideSumDFsorted = sumCountDict(comboGuideDict, fullAcc)
 species = metaDF['spp'][1]
 guideSumDFsorted.to_csv(species + "_all_guides_hit_summary.tsv", sep="\t", index=False)
 
+Path("top100guides").mkdir(parents=True, exist_ok=True)
 topTargets = guideSumDFsorted['target'][0:100].to_list()
 for target in topTargets:
     targetDict = comboGuideDict[target]
