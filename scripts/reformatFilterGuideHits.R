@@ -10,8 +10,8 @@ guideFile <- paste0(inputPrefix, "_guides_hit_summary.tsv")
 guideDF <- read_tsv(guideFile)
 print(paste("Input DF", nrow(guideDF)))
 
-if ("prop_subtypes_hit" %in% colnames(guideDF)) {
-  guideDF <- guideDF |> rename(p_subtypes_hit =prop_subtypes_hit)
+if ("prop_groups_hit" %in% colnames(guideDF)) {
+  guideDF <- guideDF |> rename(p_groups_hit =prop_groups_hit)
 }
 if ("refStart" %in% colnames(guideDF)) {
   guideDF <- guideDF |> rename(start = refStart)

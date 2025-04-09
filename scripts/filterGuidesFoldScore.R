@@ -4,8 +4,9 @@ library(tidyverse)
 
 args <- commandArgs(TRUE)
 inputPrefix <- args[1]
+inputCutoff <- args[2]
 
-guidesIn <- read_delim(paste0(inputPrefix, "_guides_filtered0.5.tsv"))
+guidesIn <- read_delim(paste0(inputPrefix, "_guides_filtered",inputCutoff, ".tsv"))
 if ("refStart" %in% colnames(guidesIn)) {
   guidesIn <- guidesIn |> rename(start = refStart)
 }
@@ -15,7 +16,7 @@ foldedKeep <- foldedIn |>
   select(target, has_hairpin, spacer_basepairs, MFE)
 
 guidesOut <- full_join(guidesIn, foldedKeep) |>
-  relocate(has_hairpin, .before =total_hit)
+  relocate(has_hairpin, .after =target)
 
 write_tsv(guidesOut, paste0(inputPrefix, "_guides_withFoldScore.tsv"))
 

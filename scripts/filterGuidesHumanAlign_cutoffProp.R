@@ -14,7 +14,7 @@ alignKeep <- alignIn |>
   select(target, ct)
 
 guidesOut <- full_join(guidesIn, alignKeep) |>
-  relocate(ct, .before =total_hit) |>
+  relocate(ct, .before =accessions_hit) |>
   rename(humanCount = ct)
 
 write_tsv(guidesOut, paste0(inputPrefix, "_guides_withFoldScore_wHumanAlignCount.tsv"))
@@ -26,7 +26,7 @@ print(paste("Kept", nrow(guidesFiltered), "of input", nrow(guidesOut), nrow(guid
 
 write_tsv(guidesFiltered, paste0(inputPrefix, "_guides_withHairpin_wHumanAlignZero.tsv"))
 
-if ("prop_subtypes_hit" %in% colnames(guidesFiltered)) {
+if ("prop_groups_hit" %in% colnames(guidesFiltered)) {
   guidesFiltered <- guidesFiltered |> rename(p_subtypes_hit =prop_subtypes_hit)
 }
 if ("refStart" %in% colnames(guidesFiltered)) {
