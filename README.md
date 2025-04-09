@@ -1,6 +1,6 @@
 # *In Silico* Guide Design and Screening for Viral Diagnostics with CRISPER-Cas13a
 
-This pipeline was developed to design Cas13a guides for amplification free detection of RNA virses, as was done in [Fozouni, et al. Cell 2021]([10.1016/j.cell.2020.12.001](https://doi.org/10.1016/j.cell.2020.12.001)).  It can be adapted for Cas12 guide design as well. It is based on and uses elements from the following sources:
+This pipeline was developed to design Cas13a guides for amplification free detection of RNA virses, as was done in [Fozouni, et al. Cell 2021](https://doi.org/10.1016/j.cell.2020.12.001).  It can be adapted for Cas12 guide design as well. It is based on and uses elements from the following sources:
 
 - Cas13a guide design (https://github.com/lareaulab/cas13a_guide_design/tree/main)
 - In Silico screening (https://github.com/czbiohub-sf/sc2-guide-InSilicoSCR)
