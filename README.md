@@ -71,7 +71,7 @@ python /scripts/split_fasta_bySubtype_breakIntoWindows.py \
 
 4. Sum over all subtypes (or continue by group if desired)
 ```shell
-python /scripts/count_combine_guides_generic.py /
+python /scripts/count_combine_guides.py /
 --metadataPrefix genome_metadata /
 --pathPrefix windowed_genomes/ 
 --output virus_name
